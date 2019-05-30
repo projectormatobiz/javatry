@@ -15,6 +15,11 @@
  */
 package org.docksidestage.javatry.colorbox;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.docksidestage.bizfw.colorbox.ColorBox;
+import org.docksidestage.bizfw.colorbox.yours.YourPrivateRoom;
 import org.docksidestage.unit.PlainTestCase;
 
 /**
@@ -33,6 +38,16 @@ public class Step13NumberTest extends PlainTestCase {
      * (カラーボックの中に入っているInteger型で、0から54までの値は何個ある？)
      */
     public void test_countZeroToFiftyFour_IntegerOnly() {
+        List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
+        long ans = colorBoxList.stream()
+                .flatMap(spaceList -> spaceList.getSpaceList().stream())
+                .map(content -> content.getContent())
+                .filter(intContent -> intContent instanceof Integer)
+                .filter(validContent -> (int)validContent >= 0 || (int)validContent <= 55)
+                .count();
+//                .mapToInt(castedIntContent -> Integer.parseInt((String) castedIntContent))
+//                .sum();
+        log(ans);
     }
 
     /**
@@ -40,6 +55,14 @@ public class Step13NumberTest extends PlainTestCase {
      * (カラーボックの中に入っている数値で、0から54までの値は何個ある？)
      */
     public void test_countZeroToFiftyFour_Number() {
+        List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
+        List<Object> list = colorBoxList.stream()
+                .flatMap(a -> a.getSpaceList().stream())
+                .map(a -> a.getContent())
+                .collect(Collectors.toList());
+        for (Object o : list) {
+            System.out.println(o);
+        }
     }
 
     /**

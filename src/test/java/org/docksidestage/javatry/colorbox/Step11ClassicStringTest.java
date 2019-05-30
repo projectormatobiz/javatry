@@ -15,6 +15,8 @@
  */
 package org.docksidestage.javatry.colorbox;
 
+import static org.docksidestage.bizfw.colorbox.yours.YourPrivateRoom.*;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -389,8 +391,16 @@ public class Step11ClassicStringTest extends PlainTestCase {
             List<BoxSpace> spaceList = box.getSpaceList();
             for (BoxSpace boxSpace : spaceList) {
                 Object content = boxSpace.getContent();
-                if (content instanceof YourPrivateRoom.DevilBox) {
-                    answer += content.toString().length();
+                if (content instanceof DevilBox) {
+                    DevilBox devilBox = (DevilBox) content;
+                    devilBox.wakeUp();
+                    devilBox.allowMe();
+                    devilBox.open();
+                    try {
+                        answer += devilBox.getText().length();
+                    } catch (DevilBoxTextNotFoundException e) {
+                        //                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -435,13 +445,38 @@ public class Step11ClassicStringTest extends PlainTestCase {
             for (BoxSpace boxSpace : spaceList) {
                 Object content = boxSpace.getContent();
                 if (content instanceof Map) {
-                    log("map:" + content);
+                    printMap((Map) content);
                     answer.putAll((Map) content);
                 }
             }
         }
         //全部まとめたのを表示したかったらコメント外す
         log(answer);
+    }
+
+    private void printMap(Map an) {
+        System.out.print("map: {");
+        for (Object key : an.keySet()) {
+            System.out.print(key + " = " + an.get(key) + " ; ");
+        }
+        System.out.println("}");
+    }
+
+    private void printMapDeep(Map an) {
+        boolean flag = false;
+        System.out.print("map: {");
+        for (Object key : an.keySet()) {
+            if (an.get(key) instanceof Map) {
+                // valueがMapなら深く
+                System.out.print(key + " = ");
+                printMapDeep((Map) an.get(key));
+                flag = true;
+            } else {
+                // そうじゃないなら出力
+                System.out.print(key + " = " + an.get(key) + " ; ");
+            }
+        }
+        System.out.print("}");
     }
 
     /**
@@ -456,7 +491,9 @@ public class Step11ClassicStringTest extends PlainTestCase {
             for (BoxSpace boxSpace : spaceList) {
                 Object content = boxSpace.getContent();
                 if (content instanceof Map) {
-                    log("map:" + content);
+                    printMapDeep((Map) content);
+                    System.out.println("");
+                    //                    log("map:" + content);
                     answer.putAll((Map) content);
                 }
             }
@@ -479,8 +516,8 @@ public class Step11ClassicStringTest extends PlainTestCase {
             if (box.getColor().getColorName().equals("white")) {
                 List<BoxSpace> spaceList = box.getSpaceList();
                 Object content = spaceList.get(0).getContent(); //upperスペース?
-                if (content instanceof YourPrivateRoom.SecretBox) {
-                    String currnet = ((YourPrivateRoom.SecretBox) content).getText();
+                if (content instanceof SecretBox) {
+                    String currnet = ((SecretBox) content).getText();
                     //正規表現で{}消す
                     currnet = currnet.replaceFirst("map:", "").replaceAll("[{|}]", "");
                     log(currnet);
@@ -504,8 +541,8 @@ public class Step11ClassicStringTest extends PlainTestCase {
                 List<BoxSpace> spaceList = box.getSpaceList();
                 for (int i = 1; i < 3; i++) {
                     Object content = spaceList.get(i).getContent();
-                    if (content instanceof YourPrivateRoom.SecretBox) {
-                        String currnet = ((YourPrivateRoom.SecretBox) content).getText();
+                    if (content instanceof SecretBox) {
+                        String currnet = ((SecretBox) content).getText();
                         currnet = currnet.replaceAll("map:", "");
                         answer.putAll(StringToMap(currnet));
                         log(answer);

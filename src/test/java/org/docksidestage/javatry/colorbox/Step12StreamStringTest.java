@@ -15,9 +15,12 @@
  */
 package org.docksidestage.javatry.colorbox;
 
+import static org.docksidestage.bizfw.colorbox.yours.YourPrivateRoom.*;
+
 import java.awt.*;
 import java.io.File;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,10 +47,6 @@ public class Step12StreamStringTest extends PlainTestCase {
      * (最初のカラーボックスの色の名前の文字数は？)
      */
     public void test_length_basic() {
-        int[] score = { 1, 2, };
-        for (int i = 0; i < score.length; i++) {
-
-        }
         // Listを同じように取得する。
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
         // streamを作る
@@ -113,24 +112,26 @@ public class Step12StreamStringTest extends PlainTestCase {
      * (カラーボックスに入ってる値 (文字列以外はtoString()) の中で、二番目に長い文字列は？ (ソートなしで))
      */
     public void test_length_findSecondMax() {
-        // よく分からなくなったので、一旦飛ばします
-        String max = "";
+        // そうしろって言われたからそうしたけどなんで
+        final String[] max = { "" };
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
-        String secondLengthValue = colorBoxList.stream()
+        String secondLengthString = colorBoxList.stream()
                 .flatMap(spaceList -> spaceList.getSpaceList().stream())
+                .filter(notNullContent -> notNullContent.getContent() != null)
                 .map(content -> content.getContent().toString())
                 .reduce((ans, target) -> {
-
                     // 本当にこれでいいんだろうか
-                    //                    if (target.length() >= max.length()) {
-                    //                        max = target;
-                    //                    }else {
-                    //
-                    //                    }
+                    log(target);
+                    if (max[0].length() < target.length()) {
+                        ans = max[0];
+                        max[0] = target;
+                    } else if (ans.length() < target.length()) {
+                        ans = target;
+                    }
                     return ans;
                 })
                 .orElse("not found second length value.");
-
+        log(secondLengthString);
     }
 
     /**
@@ -142,13 +143,16 @@ public class Step12StreamStringTest extends PlainTestCase {
         int ans = colorBoxList.stream()
                 .flatMap(spaceList -> spaceList.getSpaceList().stream())
                 .filter(strContent -> strContent.getContent() instanceof String)
-                .map(content -> content.getContent().toString().length())
-                .reduce((sum, value) -> {
-                    return sum += value;
-                })
-                .orElse(-1);
-        log(ans != -1 ? ans : "not found color box.");
-
+                // なんかnull判定しないと答え1少なかったから判定した
+                .filter(notNullContent -> notNullContent.getContent() != null)
+                .mapToInt(content -> content.getContent().toString().length())
+                .sum();
+        //                .reduce((sum, value) -> {
+        //                    return sum += value;
+        //                })
+        //                .orElse(-1);
+        //        log(ans != -1 ? ans : "not found color box.");
+        log(ans);
     }
 
     /**
@@ -157,9 +161,10 @@ public class Step12StreamStringTest extends PlainTestCase {
      */
     public void test_length_findMaxColorSize() {
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
-        String ans = colorBoxList.stream().map(colorList -> colorList.getColor().getColorName()).reduce((max, value) -> {
-            return max.length() >= value.length() ? max : value;
-        }).orElse("not found color box.");
+        String ans = colorBoxList.stream()
+                .map(colorList -> colorList.getColor().getColorName())
+                .max(Comparator.comparing(String::valueOf))
+                .orElse("not found color box.");
         log(ans);
     }
 
@@ -299,7 +304,6 @@ public class Step12StreamStringTest extends PlainTestCase {
                     return sum;
                 })
                 .orElse("");
-        // これで良いのかな？stream内でやらなくていいのかな
         log(!ans.equals("") ? ans.length() : "not found color box.");
     }
 
@@ -332,15 +336,24 @@ public class Step12StreamStringTest extends PlainTestCase {
         int ans = colorBoxList.stream()
                 .flatMap(spaceList -> spaceList.getSpaceList().stream())
                 .map(content -> content.getContent())
-                .filter(devil -> devil instanceof YourPrivateRoom.DevilBox)
-                .map(devilLength -> devilLength.toString().length())
+                .filter(devil -> devil instanceof DevilBox)
+                .map(enableDevil -> {
+                    DevilBox devil = (DevilBox) enableDevil;
+                    devil.wakeUp();
+                    devil.allowMe();
+                    devil.open();
+                    try {
+                        return devil.getText().length();
+                    } catch (DevilBoxTextNotFoundException e) {
+                        // やっつけ感がすごい
+                        return 0;
+                    }
+                })
                 .reduce((sum, target) -> {
                     return sum += target;
                 })
                 .orElse(-1);
-        // これで良いのかな？stream内でやらなくていいのかな
         log(ans != -1 ? ans : "not found color box.");
-
     }
 
     // ===================================================================================
@@ -375,9 +388,9 @@ public class Step12StreamStringTest extends PlainTestCase {
                 .filter(target -> target instanceof Map)
                 .map(mapContent -> (Map) mapContent)
                 .collect(Collectors.toList());
-        //
         for (Map an : ans) {
             printMapDeep(an);
+            System.out.println("");
         }
     }
 
@@ -390,26 +403,20 @@ public class Step12StreamStringTest extends PlainTestCase {
     }
 
     private void printMapDeep(Map an) {
-        for (Object keyDeep : an.keySet()) {
-            if (an.get(keyDeep) instanceof Map) {
-                // valueがMapなら深く
-                printMapDeep((Map) an.get(keyDeep));
-            }
-            //            else {
-            //                // そうじゃないなら出力
-            //                System.out.print("map: {");
-            //                for (Object key : an.keySet()) {
-            //                    System.out.print(key + " = " + an.get(key) + " ; ");
-            //                }
-            //                System.out.println("}");
-            //            }
-        }
+        boolean flag = false;
         System.out.print("map: {");
         for (Object key : an.keySet()) {
-            System.out.print(key + " = " + an.get(key) + " ; ");
+            if (an.get(key) instanceof Map) {
+                // valueがMapなら深く
+                System.out.print(key + " = ");
+                printMapDeep((Map) an.get(key));
+                flag = true;
+            } else {
+                // そうじゃないなら出力
+                System.out.print(key + " = " + an.get(key) + " ; ");
+            }
         }
-        System.out.println("}");
-
+        System.out.print("}");
     }
 
     // ===================================================================================
