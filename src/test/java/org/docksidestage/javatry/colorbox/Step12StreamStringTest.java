@@ -143,8 +143,6 @@ public class Step12StreamStringTest extends PlainTestCase {
         int ans = colorBoxList.stream()
                 .flatMap(spaceList -> spaceList.getSpaceList().stream())
                 .filter(strContent -> strContent.getContent() instanceof String)
-                // なんかnull判定しないと答え1少なかったから判定した
-                .filter(notNullContent -> notNullContent.getContent() != null)
                 .mapToInt(content -> content.getContent().toString().length())
                 .sum();
         //                .reduce((sum, value) -> {
@@ -182,11 +180,12 @@ public class Step12StreamStringTest extends PlainTestCase {
                 .filter(target -> target.getSpaceList()
                         .stream()
                         .filter(content -> content.getContent() instanceof String)
-                        .map(a -> String.valueOf(a.getContent()))
-                        // ここのfindしてるところ大丈夫かな
+                        .map(content -> String.valueOf(content.getContent()))
+                        // ここのfindしてるところ大丈夫かな、一応2件Waterにしたら2件出てきた
                         .findAny()
                         .orElse("")
                         .startsWith("Water"))
+                //                .forEach(System.out::println);
                 .findFirst()
                 .orElse(null);
         log(ans != null ? ans.getColor().getColorName() : "not found box.");
@@ -204,7 +203,6 @@ public class Step12StreamStringTest extends PlainTestCase {
                         .stream()
                         .filter(content -> content.getContent() instanceof String)
                         .map(a -> String.valueOf(a.getContent()))
-                        // ここのfindしてるところ大丈夫かな
                         .findAny()
                         .orElse("")
                         .endsWith("front"))
