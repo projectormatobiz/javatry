@@ -24,9 +24,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
-import ch.qos.logback.core.joran.util.StringToObjectConverter;
 import org.docksidestage.bizfw.colorbox.ColorBox;
 import org.docksidestage.bizfw.colorbox.color.BoxColor;
 import org.docksidestage.bizfw.colorbox.space.BoxSpace;
@@ -412,12 +410,9 @@ public class Step11ClassicStringTest extends PlainTestCase {
     //                                                                           =========
 
     /**
-     *
-     * @param string
      * @return Map<String, String>
-     * @throws IOException
      */
-    public Map StringToMap(String string) throws IOException {
+    public Map<String, String> StringToMap(String string) throws IOException {
         BufferedReader reader = new BufferedReader(new StringReader(string));
         Map<String, String> map = new HashMap<>();
         String line;
@@ -437,9 +432,10 @@ public class Step11ClassicStringTest extends PlainTestCase {
      * What string is converted to style "map:{ key = value ; key = value ; ... }" from java.util.Map in color-boxes? <br>
      * (カラーボックスの中に入っている java.util.Map を "map:{ key = value ; key = value ; ... }" という形式で表示すると？)
      */
+    @SuppressWarnings("unchecked")
     public void test_showMap_flat() {
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
-        Map<String, Integer> answer = new HashMap<String, Integer>();
+        Map<String, Integer> answer = new HashMap<>();
         for (ColorBox box : colorBoxList) {
             List<BoxSpace> spaceList = box.getSpaceList();
             for (BoxSpace boxSpace : spaceList) {
@@ -463,14 +459,12 @@ public class Step11ClassicStringTest extends PlainTestCase {
     }
 
     private void printMapDeep(Map an) {
-        boolean flag = false;
         System.out.print("map: {");
         for (Object key : an.keySet()) {
             if (an.get(key) instanceof Map) {
                 // valueがMapなら深く
                 System.out.print(key + " = ");
                 printMapDeep((Map) an.get(key));
-                flag = true;
             } else {
                 // そうじゃないなら出力
                 System.out.print(key + " = " + an.get(key) + " ; ");
@@ -483,16 +477,17 @@ public class Step11ClassicStringTest extends PlainTestCase {
      * What string is converted to style "map:{ key = value ; key = map:{ key = value ; ... } ; ... }" from java.util.Map in color-boxes? <br>
      * (カラーボックスの中に入っている java.util.Map を "map:{ key = value ; key = map:{ key = value ; ... } ; ... }" という形式で表示すると？)
      */
+    @SuppressWarnings("unchecked")
     public void test_showMap_nested() {
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
-        Map<String, Integer> answer = new HashMap<String, Integer>();
+        Map<String, Integer> answer = new HashMap<>();
         for (ColorBox box : colorBoxList) {
             List<BoxSpace> spaceList = box.getSpaceList();
             for (BoxSpace boxSpace : spaceList) {
                 Object content = boxSpace.getContent();
                 if (content instanceof Map) {
                     printMapDeep((Map) content);
-                    System.out.println("");
+                    System.out.println();
                     //                    log("map:" + content);
                     answer.putAll((Map) content);
                 }
@@ -511,7 +506,7 @@ public class Step11ClassicStringTest extends PlainTestCase {
      */
     public void test_parseMap_flat() throws IOException {
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
-        Map<String, String> answer = new HashMap<String, String>();
+        Map<String, String> answer;
         for (ColorBox box : colorBoxList) {
             if (box.getColor().getColorName().equals("white")) {
                 List<BoxSpace> spaceList = box.getSpaceList();
