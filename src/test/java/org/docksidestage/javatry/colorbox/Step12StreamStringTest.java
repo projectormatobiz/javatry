@@ -17,17 +17,13 @@ package org.docksidestage.javatry.colorbox;
 
 import static org.docksidestage.bizfw.colorbox.yours.YourPrivateRoom.*;
 
-import java.awt.*;
 import java.io.File;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.docksidestage.bizfw.colorbox.ColorBox;
-import org.docksidestage.bizfw.colorbox.space.BoxSpace;
 import org.docksidestage.bizfw.colorbox.yours.YourPrivateRoom;
 import org.docksidestage.unit.PlainTestCase;
 
@@ -236,14 +232,15 @@ public class Step12StreamStringTest extends PlainTestCase {
      */
     public void test_lastIndexOf_findIndex() {
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
+        String SearchString = "ど";
         String ans = colorBoxList.stream()
                 .flatMap(spaceList -> spaceList.getSpaceList().stream())
                 .filter(strContent -> strContent.getContent() instanceof String)
                 .map(content -> String.valueOf(content.getContent()))
-                .filter(target -> target.indexOf("ど", target.indexOf("ど")) != 0)
+                .filter(target -> target.indexOf(SearchString, target.indexOf(SearchString)) != -1)
                 .findFirst()
                 .orElse("");
-        log(!ans.equals("") ? ans.lastIndexOf("ど") + 1 : "not found color box.");
+        log(!ans.equals("") ? ans.lastIndexOf(SearchString) + 1 : "not found color box.");
     }
 
     // ===================================================================================
@@ -348,7 +345,7 @@ public class Step12StreamStringTest extends PlainTestCase {
                     }
                 })
                 .reduce((sum, target) -> {
-                    return sum += target;
+                    return sum + target;
                 })
                 .orElse(-1);
         log(ans != -1 ? ans : "not found color box.");
@@ -388,7 +385,7 @@ public class Step12StreamStringTest extends PlainTestCase {
                 .collect(Collectors.toList());
         for (Map an : ans) {
             printMapDeep(an);
-            System.out.println("");
+            System.out.println();
         }
     }
 
@@ -401,14 +398,12 @@ public class Step12StreamStringTest extends PlainTestCase {
     }
 
     private void printMapDeep(Map an) {
-        boolean flag = false;
         System.out.print("map: {");
         for (Object key : an.keySet()) {
             if (an.get(key) instanceof Map) {
                 // valueがMapなら深く
                 System.out.print(key + " = ");
                 printMapDeep((Map) an.get(key));
-                flag = true;
             } else {
                 // そうじゃないなら出力
                 System.out.print(key + " = " + an.get(key) + " ; ");
