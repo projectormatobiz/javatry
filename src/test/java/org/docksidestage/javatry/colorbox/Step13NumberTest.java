@@ -15,20 +15,12 @@
  */
 package org.docksidestage.javatry.colorbox;
 
-import static java.math.BigDecimal.*;
-import static java.util.Map.*;
-
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.docksidestage.bizfw.colorbox.ColorBox;
-import org.docksidestage.bizfw.colorbox.size.BoxSize;
-import org.docksidestage.bizfw.colorbox.space.BoxSpace;
 import org.docksidestage.bizfw.colorbox.yours.YourPrivateRoom;
 import org.docksidestage.unit.PlainTestCase;
 
@@ -103,6 +95,7 @@ public class Step13NumberTest extends PlainTestCase {
      * What is total of BigDecimal values in List in color-boxes? <br>
      * (カラーボックスの中に入ってる List の中の BigDecimal を全て足し合わせると？)
      */
+    @SuppressWarnings("unchecked")
     public void test_sumBigDecimalInList() {
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
         //        List<List> ans =
@@ -114,7 +107,6 @@ public class Step13NumberTest extends PlainTestCase {
                 .flatMap(a -> a.stream())
                 .filter(b -> b instanceof BigDecimal)
                 // .forEach(System.out::println);
-                .map(c -> (BigDecimal) c)
                 .reduce((answer, target) -> {
                     log(target);
                     BigDecimal sum = (BigDecimal) answer;
@@ -131,21 +123,19 @@ public class Step13NumberTest extends PlainTestCase {
      * (カラーボックスに入ってる、valueが数値のみの Map の中で一番大きいvalueのkeyは？)
      */
     public void test_findMaxMapNumberValue() {
+        // めっちゃ色々諦めた、また考えよう
         List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
-//        long ans =
-                colorBoxList.stream()
+        Map<String, Integer> ans = colorBoxList.stream()
                 .flatMap(spaceList -> spaceList.getSpaceList().stream())
                 .map(content -> content.getContent())
                 .filter(numberContent -> numberContent instanceof Map)
                 .map(mapContent -> (Map) mapContent)
-                .filter(a -> a.keySet().stream()
-                .allMatch(b -> b instanceof Number)
-                )
-                .forEach(System.out::println);
-//                .filter(validContent -> ((Number) validContent).doubleValue() >= 0 && ((Number) validContent).doubleValue() <= 54)
-//                .count();
-//        log(ans);
-
+                .filter(a -> a.values().stream().allMatch(b -> b instanceof Number))
+                .findFirst()
+                .orElse(null);
+        log(ans);
+        String max = ans.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+        log(max);
     }
 
     /**
@@ -153,5 +143,21 @@ public class Step13NumberTest extends PlainTestCase {
      * (purpleのカラーボックスに入ってる Map の中のvalueの数値・数字の合計は？)
      */
     public void test_sumMapNumberValue() {
+        List<ColorBox> colorBoxList = new YourPrivateRoom().getColorBoxList();
+        //        long ans =
+        colorBoxList.stream()
+                .filter(purpleBox -> purpleBox.getColor().getColorName().equals("purple"))
+                .flatMap(speceList -> speceList.getSpaceList().stream())
+                .filter(mapContent -> mapContent.getContent() instanceof Map)
+                .map(mapContent -> (Map<Object, Object>) mapContent.getContent())
+                .map(value ->
+                        // Numberは取れてるけど、String型の数値をまだ取れてないね
+                    value.entrySet().stream().filter(v -> v.getValue() instanceof Number)
+                            .collect(Collectors.toMap(
+                                    e -> e.getKey()
+                                    ,e -> e.getValue()
+                            ))
+                )
+                .forEach(System.out::println);
     }
 }
